@@ -1,10 +1,10 @@
 export default `
-|           o    |
-|                |
-|         o      |
+|           ooo  |
+|             og |
+|         o   ooo|
 |        o       |
 |       o        |
-|      o         |
+|      o    1    |
 |     o          |
 |    o           |
 |   o      oooooo|

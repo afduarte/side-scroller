@@ -1,37 +1,74 @@
 <template lang="pug">
-  #game
+  .container
+    span.lives(v-for="n in lvs") {{ n }}
+    p Score: {{ score }}
+    #game
 </template>
 
 <script>
-import settings from '../settings'
-import p5 from 'p5';
-import 'p5/lib/addons/p5.dom';
-import 'p5/lib/addons/p5.sound';
-import g from '../p5/sketch';
+import Game from '../p5/sketch';
+import levels from '../../levels/main'
 import { EventBus } from '../bus';
-const Game = {
+const VueGame = {
   name: 'game',
-  props: ['difficulty'],
+  props: ['difficulty', 'lives'],
   data() {
     return {
-      lives: settings.lives,
-      game: null
+      lvs: this.lives || 3,
+      game: null,
+      level: 0,
+      score: 0
     }
   },
   methods: {
     newGame() {
-      this.game = new p5(g, 'game');
+      // delete the old game first
+      if (this.game) {
+        this.game = null;
+        let canvas = document.querySelector('canvas');
+        canvas.parentNode.removeChild(canvas);
+      }
+      this.level = this.level - 1 >= levels.length ? 0 : this.level;
+      this.game = new Game(this.level, this.level);
+    },
+    takeLive() {
+      this.lvs--;
+      if (this.lvs <= 0) {
+        this.score = 0;
+        this.level = 0;
+        this.newGame();
+      }
+    },
+    reachedGoal() {
+      this.level++;
+      this.newGame();
+    },
+    coin({ score }) {
+      this.score += score;
+    }
+  },
+  computed: {
+    posString() {
+      return this.l + ',' + this.r + ',' + this.d + ',' + this.u;
     }
   },
   mounted() {
     this.newGame();
+  },
+  created() {
+    EventBus.$on('goal', this.reachedGoal);
+    EventBus.$on('died', this.takeLive);
+    EventBus.$on('coin', this.coin);
   }
 }
-// EventBus.$on('died', Game.methods.newGame);
-export default Game;
+export default VueGame;
 </script>
 
 
 <style scoped>
-
+.lives {
+  width: 30px;
+  height: 30px;
+  background-color: #dd8888
+}
 </style>

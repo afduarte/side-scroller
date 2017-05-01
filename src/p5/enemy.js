@@ -1,53 +1,20 @@
 import { EventBus } from '../bus'
-export default class Hero {
-  constructor(p) {
+export default class Enemy {
+  constructor(p,x,y) {
     this.height = 30;
     this.width = 30;
-    this.pos = p.createVector(15, 0);
-    this.vel = p.createVector(0, 0);
-    this.acc = p.createVector(0, 0);
-    this.minHeight = p.height - this.height - 50 + 15;
+    this.pos = p.createVector(x, y);
+    this.vel = p.createVector(0.3, 0);
+
     this.p = p;
-    this.friction = 0.075;
-    this.fricRight = p.createVector(-this.friction, 0);
-    this.fricLeft = p.createVector(this.friction, 0);
     this.gravity = p.createVector(0, 0.15);
-    this.maxSpeed = 5;
-    this.jumping = false;
-    this.colMat = null;
-    this.dead = false;
-  }
-  jump() {
-    // Check if it's already jumping
-    if (!this.jumping) {
-      this.jumping = true;
-      this.applyForce(this.p.createVector(0, -7));
-      setTimeout(() => {
-        this.jumping = false;
-      }, 850)
-    }
-  }
-  move(x) {
-    if ((x > 0 && this.vel.x <= this.maxSpeed) || (x < 0 && this.vel.x >= -this.maxSpeed)) {
-      this.applyForce(this.p.createVector(x, 0));
-    }
   }
   update(colMat) {
     // Gravity
     this.applyForce(this.gravity)
-    // Friction
-    if (this.vel.x > this.friction) {
-      this.applyForce(this.fricRight)
-    } else if (this.vel.x < -this.friction) {
-      this.applyForce(this.fricLeft)
-    } else {
-      this.vel.x = 0;
-    }
 
-    this.vel.add(this.acc);
     this.edges(colMat);
     this.pos.add(this.vel);
-    this.acc.set(0, 0);
 
     this.display();
   }
@@ -65,12 +32,12 @@ export default class Hero {
       if (this.vel.x > 0) {
         // colliding on the right? stop going right
         let sq = colMat[cy][r]
-        this.vel.x = sq && sq.collide ? 0 : this.vel.x;
+        this.vel.x = sq && sq.collide ? -this.vel.x : this.vel.x;
 
       } else if (this.vel.x < 0) {
         // colliding on the left? stop going left
         let sq = colMat[cy][l]
-        this.vel.x = sq && sq.collide ? 0 : this.vel.x;
+        this.vel.x = sq && sq.collide ? -this.vel.x : this.vel.x;
       }
     }
 
@@ -98,11 +65,9 @@ export default class Hero {
       }
     }
   }
-  applyForce(force) {
-    this.acc.add(force);
-  }
+
   display() {
-    this.p.fill('#bbeeff');
+    this.p.fill('#684e36');
     this.p.ellipse(this.pos.x, this.pos.y, this.width, this.height);
   }
 
